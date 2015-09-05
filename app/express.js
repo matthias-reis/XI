@@ -7,6 +7,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var swig = require('swig');
 var routes = require('../conf/routes');
+require("node-jsx").install();
 
 var app = express();
 

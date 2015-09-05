@@ -4,9 +4,9 @@ var Page = require('../app/page');
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-    var page = new Page(req, res, next);
+    var page = new Page();
     res.render('index', {
-        page:page.getData(),
+        page:page.getData(req, res, next),
         version: '0.0.1'
     });
 });
