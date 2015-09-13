@@ -1,3 +1,4 @@
+var expressListRoutes = require('express-list-routes');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -7,6 +8,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var swig = require('swig');
 var routes = require('../conf/routes');
+
 require("node-jsx").install();
 
 var app = express();
@@ -28,18 +30,14 @@ app.use(cookieParser());
 
 app.use('/', routes);
 
-app.notFound = function (next) {
-    var err = new Error('Nichts gefunden');
-    err.status = 404;
-    next(err);
-};
-
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    app.notFound(next);
+    console.log('NICHTS GEFUNDEN');
+    res.status(404).render('404');
 });
 
 app.use(function (err, req, res) {
+    console.log('ERROR RAISED');
     log.error('FEHLER', err.status);
     if (err.status != 404) {
         console.log('inside');

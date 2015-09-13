@@ -1,38 +1,40 @@
-var React = require('react/addons');
+var React = require('react');
 
-var Page = function () {};
+var Page = function (config) {
+    this.data = config;
+    this.node = config.node;
+    this.cacheable = true;
+};
+
+Page.create = function (config) {
+    return new Page(config);
+};
 
 Page.prototype = {
-    render: function () {
-        if(!this.cache) {
-            if (this.node) {
-                this.cache = React.renderToString(this.node({}));
+    react: function () {
+        console.log('cacheable', this.cacheable, this.cache);
+        if(!this.cacheable || !this.cache) {
+            if (this.data.node) {
+                this.cache = React.renderToString(React.createElement(this.node, this.data));
             } else {
-                this.cache =  '<h1>Hallo Renderer</h1>';
+                this.cache = '<h1>No Node Found</h1>';
             }
         }
 
         return this.cache;
     },
+
+    render: function (req, res, next) {
+        res.render('index', this.getData(req, res, next));
+    },
+
     getData: function (req, res, next) {
-        return {
-            title: this.meta.title + '&rdquo;' || '',
-            description: this.meta.description || '',
-            keywords: this.meta.keywords || [],
-            version: req.app.get('version'),
-            css: this.meta.css || req.app.get('baseCss'),
-            js: this.meta.css || req.app.get('baseJs'),
-            debug: req.app.get('debug'),
-            content: this.render()
+        if(this.data.request) {
+            this.cacheable = false;
+            this.data.request.call(this, req, res, next);
         }
-    },
-    setNode: function (node) {
-        this.node = node;
-        return this;
-    },
-    meta: function (meta) {
-        this.meta = meta;
-        return this;
+        this.data.content = this.react();
+        return this.data;
     }
 };
 
