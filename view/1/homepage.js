@@ -9,7 +9,7 @@ module.exports = Page.create({
     keywords: ['key', 'word'],
     css: ['/core/css/styleguide','/1/css/main'],
     js: ['/core/js/core','/1/js/main'],
-    node: require('./react/Page.Home'),
+    node: require('./react/PageHome.backend'),
     request: function(req, res, next) {
         counter++;
         this.data.counter = counter;
