@@ -1,38 +1,36 @@
-var expressListRoutes = require('express-list-routes');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
 var log = require('./log');
+var accessLog = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var swig = require('swig');
-var routes = require('../conf/routes');
-
-require("node-jsx").install();
 
 var app = express();
 
-app.routing = express.Router();
-
 // view engine setup
-app.engine('twig', swig.renderFile);
-app.set('views', path.join(__dirname, '../view/core/tpl'));
-app.set('view engine', 'twig');
-app.set('version', require('../package.json').version);
+app.set('view engine', 'jade');
+app.set('views', './srv/core/views');
+app.set('version', require('../../package.json').version);
 
 // uncomment after placing your favicon in /public
-app.use(favicon('view/core/img/favicon.ico'));
-app.use(logger(':date   [:status :method :url]   [t: :response-time]   [from: :remote-addr]   [Referrer: :referrer]   [UA: :user-agent]'));
+app.use(favicon('client/assets/favicon.ico'));
+app.use(accessLog(':date   [:status :method :url]   [t: :response-time]   [from: :remote-addr]   [Referrer: :referrer]   [UA: :user-agent]'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use('/', routes);
+app.use('/client', express.static('client',{fallthrough: false}));
+
+app.get('/', function (req, res) {
+    "use strict";
+    res.render('index');
+});
+
+//app.use('/', app.magazine.routing());
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    console.log('NICHTS GEFUNDEN');
+app.use(function (req, res) {
     res.status(404).render('404');
 });
 

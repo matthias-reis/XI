@@ -1,8 +1,5 @@
 var winston = require('winston');
 
-//
-// Logging levels
-//
 var config = {
     levels: {
         silly: 0,
