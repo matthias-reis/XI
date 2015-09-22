@@ -2,20 +2,40 @@
     "use strict";
     var version = '0.0.1',
         handlers = {},
-        isArray = function (obj) {
-            return obj && obj.length;
-        };
+        currentId = 0,
+        nodes = {},
+        modulePaths = {};
 
-    global.x1 = function (dependencies, tasks) {
+    function noop() {}
+
+    function isArray(obj) {
+        return obj && obj.length;
+    }
+
+    function is(item, type) {
+        return toString.call(item).indexOf('[object ' + type) == 0;
+    }
+
+    function load(moduleName) {}
+
+    global.x1 = function (name, dependencies, tasks) {
         var node = {
             _version: version,
+            _id: currentId++,
             _statements: []
         };
+        if(typeof name !== 'string') {
+            dependencies = name;
+            tasks = arguments[1];
+        } else {
+            node.name = name;
+            nodes[name] = node;
+        }
+
         if(!isArray(dependencies)) {
             tasks = dependencies;
             dependencies = null;
         }
-        node.dependencies = dependencies;
 
         for(var key in tasks) {
             if(tasks.hasOwnProperty(key)) {
@@ -36,6 +56,10 @@
         } else {
             this.node.statements.push('handler: registered without callback function [' + key + ']')
         }
+    };
+
+    x1.paths = function (paths) {
+      modulePaths = paths;
     };
 
     x1.register('exec', function (cb) {

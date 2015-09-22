@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 var React = require('react/addons');
-var Markdown = require('../../core/react/Markdown.backend');
+var Markdown = require('../../core/react/Markdown.backend.js');
 
 var PageHome =  React.createClass({
     render: function () {

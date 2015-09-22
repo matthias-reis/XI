@@ -23,10 +23,7 @@
         prevDefine,
         doc = global.document,
         head = doc && (doc['head'] || doc.getElementsByTagName('head')[0]),
-    // to keep IE from crying, we need to put scripts before any
-    // <base> elements, but after any <meta>. this should do it:
         insertBeforeEl = head && head.getElementsByTagName('base')[0] || null,
-    // constants / flags
         msgUsingExports = {},
         msgFactoryExecuted = {},
     // this is the list of scripts that IE is loading. one of these will

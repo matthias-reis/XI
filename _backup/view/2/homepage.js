@@ -1,4 +1,4 @@
-var Page = require('../../app/page'),
+var Page = require('.././page'),
     counter = 0;
 
 module.exports = Page.create({

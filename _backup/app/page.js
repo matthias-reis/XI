@@ -12,7 +12,6 @@ Page.create = function (config) {
 
 Page.prototype = {
     react: function () {
-        console.log('cacheable', this.cacheable, this.cache);
         if(!this.cacheable || !this.cache) {
             if (this.data.node) {
                 this.cache = React.renderToString(React.createElement(this.node, this.data));
