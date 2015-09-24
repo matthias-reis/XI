@@ -22,14 +22,38 @@
         return toString.call(item).indexOf('[object ' + type) == 0;
     }
 
-    function loadNode(nodeName, cb) {
+    function loadNode(nodeName) {
+        //three variants
+        //already loaded
+        if(nodes[nodeName]) {
+            return new Promise(function (resolve) {
+                resolve(nodes[nodeName]);
+            })
+        } else if (loadingNodes[nodeName]) {
+            return loadingNodes[nodeName]
+        } else if (modulePaths[nodeName]) {
+            loadingNodes[nodeName] = new Promise(function (resolve, reject) {
 
+            });
+        }
+        //loading
+        //not yet loading
+        return new Promise(function(resolve, reject){
+
+            var dependencies = modulePaths[nodeName];
+            if(dependencies){
+                resolve('1');
+            } else {
+                reject(new Error('dependency not found [' + nodeName + ']'));
+            }
+        });
     }
 
     function load(url, deferred, cb) {
         var el = document.createElement('script');
         function process (ev) {
             ev = ev || global.event;
+            var readyStates = 'addEventListener' in global ? {} : { 'loaded': 1, 'complete': 1 };
             if (ev.type == 'load' || readyStates[el.readyState]) {
                 delete activeScripts[def.id];
                 el.onload = el.onreadystatechange = el.onerror = '';
@@ -97,8 +121,14 @@
             dependencies = [];
         }
 
-        on('documentRunnable', function () {
-
+        on('document-runnable', function () {
+            dependencies.forEach(function (dependency){
+               loadNode(dependency).then(function (node) {
+                   console.log(dependency, node);
+               }).catch(function (err) {
+                   throw err;
+               })
+            });
         });
 
         for(var key in tasks) {
@@ -154,5 +184,4 @@
     } else {
         trigger('runnable');
     }
-
 })(this);
