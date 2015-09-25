@@ -8,6 +8,7 @@ module.exports = function(config) {
     files: [
       'client/js/x1/x1.bootstrap.js',
       {pattern: 'client/js/x1/x1.*.js', watched: true, included: false, served: true},
+      {pattern: 'test/fixtures/*.js', watched: true, included: false, served: true},
       'test/config.js',
       'test/*.spec.js'
     ],

@@ -22,8 +22,8 @@
         resolve(nodes[nodeName]);
       })
     } else if (loadingNodes[nodeName]) {
-      return loadingNodes[nodeName]
-    } else if (modulePaths[nodeName]) {
+      return loadingNodes[nodeName];
+    } else {
       loadingNodes[nodeName] = new Promise(function(resolve, reject) {
         var counter = modulePaths[nodeName].length;
         modulePaths[nodeName].forEach(function(path) {
@@ -44,7 +44,6 @@
   }
 
   function load(url, cb) {
-    console.log(url);
     var el = document.createElement('script');
 
     function process(ev) {
@@ -77,7 +76,7 @@
     } else {
       events[eventName].triggered = true;
       events[eventName].payload = payload;
-      events[eventName].callbacks.forEach(function(callback) {
+      events[eventName].callbacks && events[eventName].callbacks.forEach(function(callback) {
         callback(payload);
       });
     }
@@ -127,8 +126,9 @@
       var counter = dependencies.length;
       if (dependencies.length) {
         dependencies.forEach(function(dependency) {
-          loadNode(dependency).then(function(node) {
-            node.dependencies[dependency] = node;
+          loadNode(dependency).then(function(otherNode) {
+            node._dependencies[dependency] = otherNode;
+            counter--;
             if (!counter) {
               node.trigger('ready');
             }
@@ -139,7 +139,6 @@
       } else {
         node.trigger('ready');
       }
-
     });
 
     for (var key in tasks) {
@@ -195,7 +194,7 @@
   x1.register('ready', function(cb) {
     var node = this;
     node.on('ready', function() {
-      cb.call(node, node.dependencies);
+      cb.call(node, node._dependencies);
     });
   });
 
