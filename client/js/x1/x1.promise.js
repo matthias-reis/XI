@@ -186,5 +186,4 @@
     } else if (!root.Promise) {
         root.Promise = Promise;
     }
-
 })(this);
