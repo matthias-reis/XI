@@ -1,6 +1,6 @@
-x1('node12', {
+x1('othernode', {
     exec: function () {
         "use strict";
-        console.log('node12');
+        console.log('othernode');
     }
 });

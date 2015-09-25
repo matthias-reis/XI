@@ -11,21 +11,19 @@
         events = {},
         document = global.document;
 
-    function noop() {}
+    function noop() {
+    }
 
     function isArray(obj) {
         return obj && obj.length;
     }
-
 
     function is(type, item) {
         return toString.call(item).indexOf('[object ' + type) == 0;
     }
 
     function loadNode(nodeName) {
-        //three variants
-        //already loaded
-        if(nodes[nodeName]) {
+        if (nodes[nodeName]) {
             return new Promise(function (resolve) {
                 resolve(nodes[nodeName]);
             })
@@ -33,35 +31,37 @@
             return loadingNodes[nodeName]
         } else if (modulePaths[nodeName]) {
             loadingNodes[nodeName] = new Promise(function (resolve, reject) {
-
+                var counter = modulePaths[nodeName].length;
+                modulePaths[nodeName].forEach(function (path) {
+                    load(path, function (res) {
+                        if (!res.success) {
+                            reject(new Error('could not load [' + path + '] of node [' + nodeName + ']'))
+                        }
+                        counter--;
+                        if (!counter) {
+                            resolve(nodes[nodeName]);
+                        }
+                    });
+                });
             });
-        }
-        //loading
-        //not yet loading
-        return new Promise(function(resolve, reject){
 
-            var dependencies = modulePaths[nodeName];
-            if(dependencies){
-                resolve('1');
-            } else {
-                reject(new Error('dependency not found [' + nodeName + ']'));
-            }
-        });
+            return loadingNodes[nodeName];
+        }
     }
 
-    function load(url, deferred, cb) {
+    function load(url, cb) {
         var el = document.createElement('script');
-        function process (ev) {
+
+        function process(ev) {
             ev = ev || global.event;
-            var readyStates = 'addEventListener' in global ? {} : { 'loaded': 1, 'complete': 1 };
+            var readyStates = 'addEventListener' in global ? {} : {'loaded': 1, 'complete': 1};
             if (ev.type == 'load' || readyStates[el.readyState]) {
-                delete activeScripts[def.id];
                 el.onload = el.onreadystatechange = el.onerror = '';
-                cb();
+                cb({success: true});
             }
         }
 
-        function fail (err) {
+        function fail(err) {
             cb({success: false, message: 'error: requesting url [' + url + ']'});
         }
 
@@ -69,30 +69,32 @@
         el.onerror = fail;
         el.type = 'text/javascript';
         el.charset = 'utf-8';
-        el.defer = deferred;
+        el.async = true;
         el.src = url;
-
-        activeScripts[def.id] = el;
 
         var firstScriptEl = document.getElementsByTagName('script')[0];
         firstScriptEl.parentNode.insertBefore(el, firstScriptEl);
     }
 
-    function trigger(eventName) {
-        if(!events[eventName]) {
+    function trigger(eventName, payload) {
+        if (!events[eventName]) {
             events[eventName] = {triggered: true}
         } else {
+            events[eventName].payload = payload;
             events[eventName].callbacks.forEach(function (callback) {
-                callback();
+                callback(payload);
             });
         }
     }
 
     function on(eventName, callback) {
-        if(!events[eventName]) {
+        if (!events[eventName]) {
             events[eventName] = {triggered: false, callbacks: []}
+        } else if (events[eventName].triggered) {
+            callback(events[eventName].payload);
+        } else {
+            events[eventName].callbacks.push(callback);
         }
-        events[eventName].callbacks.push(callback);
     }
 
     global.x1 = function (name, dependencies, tasks) {
@@ -100,11 +102,12 @@
             node = {
                 _version: version,
                 _id: currentId++,
-                _messages: []
+                _messages: [],
+                _dependencies: {}
             };
 
-        if(!is('String', name)) {
-            node.name = 'anonymous';
+        if (!is('String', name)) {
+            node.name = 'anonymous' + node._id;
             dependencies = arguments[0];
             tasks = arguments[1];
         } else {
@@ -112,28 +115,36 @@
             nodes[name] = node;
         }
 
-        node.on = function(event, cb) {
-            on('node' + node._id, cb);
+        node.on = function (event, cb) {
+            on(node._id + ':' + event, cb);
         };
 
-        if(!isArray(dependencies)) {
+        node.trigger = function (event, payload) {
+            trigger(node._id + ':' + event, payload);
+        };
+
+        if (!isArray(dependencies)) {
             tasks = dependencies;
             dependencies = [];
         }
 
         on('document-runnable', function () {
-            dependencies.forEach(function (dependency){
-               loadNode(dependency).then(function (node) {
-                   console.log(dependency, node);
-               }).catch(function (err) {
-                   throw err;
-               })
+            var counter = dependencies.length;
+            dependencies.forEach(function (dependency) {
+                loadNode(dependency).then(function (node) {
+                    node.dependencies[dependency] = node;
+                    if(!counter) {
+                        node.trigger('ready');
+                    }
+                }).catch(function (err) {
+                    throw err;
+                })
             });
         });
 
-        for(var key in tasks) {
-            if(tasks.hasOwnProperty(key)) {
-                if(handlers[key]) {
+        for (var key in tasks) {
+            if (tasks.hasOwnProperty(key)) {
+                if (handlers[key]) {
                     handlers[key].call(node, tasks[key]);
                 } else {
                     node._messages.push('config: handler not found for [' + key + ']');
@@ -145,7 +156,7 @@
     };
 
     x1.register = function (key, callback) {
-        if(typeof callback == 'function') {
+        if (typeof callback == 'function') {
             handlers[key] = callback;
         } else {
             this.node._messages.push('handler: registered without callback function [' + key + ']')
@@ -153,19 +164,10 @@
     };
 
     x1.paths = function (paths) {
-      modulePaths = paths;
+        modulePaths = paths;
     };
 
-    x1.register('exec', function (cb) {
-        cb.call(this);
-    });
 
-    x1.register('ready', function (cb) {
-        var node = this;
-        window.addEventListener("load", function () {
-            cb.call(node);
-        });
-    });
 
     window.addEventListener("load", function () {
         window.setTimeout(function () {
@@ -173,15 +175,29 @@
         }, 0);
     });
 
-    if(!window.Promise) {
-        load(modulePaths.x1 + '/x1.promise.js', false, function(result) {
-            if(result.success) {
+    if (!window.Promise) {
+        load(modulePaths.x1 + '/x1.promise.js', false, function (result) {
+            if (result.success) {
                 trigger('runnable');
             } else {
-              throw Error('could not load promise polyfill ... stoppping execution')
+                throw Error('could not load promise polyfill ... stoppping execution')
             }
         });
     } else {
         trigger('runnable');
     }
+
+    // BASIC REGISTERS
+
+    x1.register('run', function (cb) {
+        cb.call(this);
+    });
+
+    x1.register('ready', function (cb) {
+        var node = this;
+        node.on('ready', function () {
+            cb.call(node, node.dependencies);
+        });
+    });
+
 })(this);

@@ -5,7 +5,7 @@ console.log('===> simple log output after evaluation');
 x1.paths({
     x1: '/x1',
     node1: ['/client/js/node11.js', '/client/js/node12.js'],
-    node2: ['/client/js/Module2.js']
+    node2: ['/client/js/node2.js']
 });
 
 var nodes = [
