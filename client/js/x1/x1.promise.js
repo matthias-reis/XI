@@ -10,11 +10,11 @@
   function bind(fn, thisArg) {
     return function() {
       fn.apply(thisArg, arguments);
-    }
+    };
   }
 
   var isArray = Array.isArray || function(value) {
-        return Object.prototype.toString.call(value) === "[object Array]"
+        return Object.prototype.toString.call(value) === "[object Array]";
       };
 
   function Promise(fn) {
@@ -31,10 +31,10 @@
     var me = this;
     if (this._state === null) {
       this._deferreds.push(deferred);
-      return
+      return;
     }
     asap(function() {
-      var cb = me._state ? deferred.onFulfilled : deferred.onRejected
+      var cb = me._state ? deferred.onFulfilled : deferred.onRejected;
       if (cb === null) {
         (me._state ? deferred.resolve : deferred.reject)(me._value);
         return;
@@ -48,12 +48,14 @@
         return;
       }
       deferred.resolve(ret);
-    })
+    });
   }
 
   function resolve(newValue) {
     try { //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
-      if (newValue === this) throw new TypeError('A promise cannot be resolved with itself.');
+      if (newValue === this) {
+        throw new TypeError('A promise cannot be resolved with itself.');
+      }
       if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
         var then = newValue.then;
         if (typeof then === 'function') {
@@ -106,7 +108,7 @@
         if (done) return;
         done = true;
         onRejected(reason);
-      })
+      });
     } catch (ex) {
       if (done) return;
       done = true;
@@ -122,7 +124,7 @@
     var me = this;
     return new Promise(function(resolve, reject) {
       handle.call(me, new Handler(onFulfilled, onRejected, resolve, reject));
-    })
+    });
   };
 
   Promise.all = function() {
@@ -138,7 +140,7 @@
             var then = val.then;
             if (typeof then === 'function') {
               then.call(val, function(val) {
-                res(i, val)
+                res(i, val);
               }, reject);
               return;
             }
