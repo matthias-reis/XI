@@ -10,9 +10,6 @@
       document = global.document,
       timeout = global.setTimeout;
 
-  function noop() {
-  }
-
   function is(type, item) {
     return toString.call(item).indexOf('[object ' + type) === 0;
   }
@@ -183,7 +180,11 @@
   };
 
   x1.paths = function(paths) {
+    if(!paths.x1) {
+      throw Error('path to x1 folder not defined');
+    }
     modulePaths = paths;
+    modulePaths['x1.streams'] = [paths.x1 + '/x1.streams.js'];
 
     if (!global.Promise) {
       load(modulePaths.x1 + '/x1.promise.js', false, function(result) {

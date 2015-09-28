@@ -34,7 +34,9 @@ gulp.task('uglify', ['lint'], function() {
 
 gulp.task('js', ['uglify'], function() {
   gulp.src('./client/js/x1-min/*.js')
-      .pipe(sizereport())
+      .pipe(sizereport({
+        gzip: true
+      }));
 });
 
 gulp.task('test', function(done) {

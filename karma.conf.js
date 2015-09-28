@@ -10,7 +10,10 @@ module.exports = function(config) {
       {pattern: 'client/js/x1/x1.*.js', watched: true, included: false, served: true},
       {pattern: 'test/fixtures/*.js', watched: true, included: false, served: true},
       'test/config.js',
-      'test/*.spec.js'
+      'test/basics.spec.js',
+      'test/ready.spec.js',
+      'test/require.spec.js',
+      'test/streams.spec.js'
     ],
     exclude: [],
     preprocessors: {},
