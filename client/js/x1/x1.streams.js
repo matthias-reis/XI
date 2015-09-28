@@ -1,6 +1,6 @@
 (function(global) {
 
-  function schedule(time, iterations, generator) {
+  function fromSchedule(time, iterations, generator) {
     generator = generator || function(i) {
       return i;
     };
@@ -80,6 +80,8 @@
       };
       s.push(data);
       s.triggerEnd();
+    }, function (err) {
+      s.triggerError(err);
     });
 
     return s;
@@ -181,7 +183,7 @@
         this._s.push(item);
       }
       this._o.forEach(function(obs) {
-        obs.do(item);
+        obs.trigger(item);
       });
     },
     transient: function() {
@@ -361,7 +363,7 @@
     Observer: Observer,
     Stream: Stream,
 
-    schedule: schedule,
+    fromSchedule: fromSchedule,
     fromArray: fromArray,
     fromRange: fromRange,
     fromPromise: fromPromise

@@ -13,7 +13,9 @@ module.exports = function(config) {
       'test/basics.spec.js',
       'test/ready.spec.js',
       'test/require.spec.js',
-      'test/streams.spec.js'
+      'test/streams-basic.spec.js',
+      'test/streams-generators.spec.js',
+      'test/streams-modification.spec.js'
     ],
     exclude: [],
     preprocessors: {},
