@@ -192,9 +192,14 @@
   });
 
   x1.register('ready', function(cb) {
-    var node = this;
+    var node = this, vals = [];
     node.on('ready', function() {
-      cb.call(node, node._dependencies);
+      for(var key in node._dependencies) {
+        if(node._dependencies.hasOwnProperty(key)){
+          vals.push(node._dependencies[key])
+        }
+      }
+      cb.apply(node, vals);
     });
   });
 

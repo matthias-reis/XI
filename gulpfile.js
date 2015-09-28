@@ -1,7 +1,10 @@
 var gulp = require('gulp'),
-    nodemon = require('gulp-nodemon');
-    sass = require('gulp-sass');
-    rename = require('gulp-rename');
+    nodemon = require('gulp-nodemon'),
+    uglify = require('gulp-uglify'),
+    size = require('gulp-filesize'),
+    sass = require('gulp-sass'),
+    rename = require('gulp-rename'),
+    Server = require('karma').Server;
 
 gulp.task('sass', function () {
     gulp.src('./view/*/sass/*.scss', {base: './'})
@@ -14,13 +17,28 @@ gulp.task('sass', function () {
 });
 
 gulp.task('js', function () {
-    gulp.src().pipe()
+    gulp.src('./client/js/x1/*.js', {base: './'})
+        .pipe(uglify())
+        .pipe(rename(function (path) {
+            path.dirname = path.dirname.replace('/x1/', '/x1-min/');
+            path.basename = path.basename + '.min';
+        }))
+        .pipe(gulp.dest('.'))
+        .pipe(size());
 });
 
-gulp.task('runprod', function () {
+gulp.task('test', function(done){
+    console.log('*** STARTING UNIT TESTS ***');
+    new Server({
+        configFile: __dirname + '/karma.conf.js',
+        singleRun: true
+    }, function () {
+        console.log('*** END UNIT TESTS ***');
+        done();
+    }).start();
 });
 
-gulp.task('run', function () {
+gulp.task('server', function () {
     nodemon({
         script: 'bin/dev.js',
         ext: 'js html',
