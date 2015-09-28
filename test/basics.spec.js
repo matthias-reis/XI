@@ -17,7 +17,7 @@ describe('X1 base featureset', function () {
   });
 
   it('should accept options as first argument and run code immediately', function (done) {
-    var node = x1({
+    x1({
       run: function () {
         expect(this._id).to.equal(2);
         done();
@@ -25,30 +25,33 @@ describe('X1 base featureset', function () {
     });
   });
 
+  it('should transform options into node properties if no handler is found', function(done) {
+    x1({
+      run: function() {
+        expect(this.value).to.equal(42);
+        done();
+      },
+      value: 42
+    }).on('error', function(err) {
+      console.log(err);
+      done();
+    });;
+  });
+
+  it('should trigger errors', function (done) {
+    x1({
+      run: function () {
+        throw new Error('artificial error');
+      }
+    }).on('error', function (err) {
+      expect(this._id).to.be.defined;
+      done();
+    });
+  });
+
   it('should accept options as the second argument and accept a name', function (done) {
     var name = 'testnode2';
-    var node = x1(name, {
-      run: function () {
-        expect(this._id).to.equal(3);
-        expect(this.name).to.equal(name);
-        done();
-      }
-    });
-  });
-
-  it('should accept options as the second argument and accept dependencies', function (done) {
-    var node = x1([], {
-      run: function () {
-        expect(this._id).to.equal(4);
-        expect(this.name).to.equal('anonymous4');
-        done();
-      }
-    });
-  });
-
-  it('should accept options as the third argument', function (done) {
-    var name = 'testnode4';
-    var node = x1(name, [], {
+    x1(name, {
       run: function () {
         expect(this._id).to.equal(5);
         expect(this.name).to.equal(name);
@@ -57,4 +60,24 @@ describe('X1 base featureset', function () {
     });
   });
 
+  it('should accept options as the second argument and accept dependencies', function (done) {
+    x1([], {
+      run: function () {
+        expect(this._id).to.equal(6);
+        expect(this.name).to.equal('anonymous6');
+        done();
+      }
+    });
+  });
+
+  it('should accept options as the third argument', function (done) {
+    var name = 'testnode4';
+    x1(name, [], {
+      run: function () {
+        expect(this._id).to.equal(7);
+        expect(this.name).to.equal(name);
+        done();
+      }
+    });
+  });
 });
