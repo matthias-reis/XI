@@ -1,0 +1,28 @@
+{
+  "name": "XI",
+  "version": "0.1.0",
+  "homepage": "https://github.com/matthias-reis/mag",
+  "authors": [
+    "Matthias Reis <matthias.reis@xing.com>"
+  ],
+  "description": "Javascript Dependency Management Framework by XING",
+  "main": "/min/XI.min.js",
+  "keywords": [
+    "js",
+    "dependency",
+    "management",
+    "dependency",
+    "injection",
+    "amd",
+    "streams",
+    "framework"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
