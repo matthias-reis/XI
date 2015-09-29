@@ -107,13 +107,10 @@ describe('Stream Generators', function() {
         var called = false;
         var hasErrors = false;
         stream.getObserver().on(function() {
-          console.log('on');
           called = true;
         }).onError(function() {
-          console.log('onError');
           hasErrors = true;
         }).finally(function() {
-          console.log('finally');
           expect(called).to.be.false;
           expect(hasErrors).to.be.true;
           done();

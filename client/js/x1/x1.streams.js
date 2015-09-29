@@ -12,6 +12,7 @@
             data: generator(i),
             meta: {
               name: 'scheduled-chunk',
+              time: time,
               iteration: i,
               maxIterations: iterations
             }
@@ -211,14 +212,14 @@
           };
           other.push(chunk);
         }, data);
-      }).onError(other.throw.bind(other)).done(other.end.bind(other));
+      }).onError(other.triggerError.bind(other)).done(other.triggerEnd.bind(other));
     },
 
 
     /*** STREAM MANIPULATORS ***/
     appendPromise: function(fn) {
       var s = new Stream();
-      this.observe().on(function(data) {
+      this.getObserver().on(function(data) {
         var promise = fn(data);
         if (!promise || !promise.then) {
           s.triggerError(new Error('appendPromise: the callback function must return a promise'));
@@ -239,12 +240,13 @@
 
     append: function(fn) {
       var s = new Stream();
+      var onError =
       this.getObserver()
           .on(function(data) {
             fn(data).getObserver()
                 .on(function(childData) {
                   s.push({
-                    data: childData,
+                    data: childData.data,
                     parent: data,
                     meta: {
                       name: 'appended-stream-chunk'
@@ -266,13 +268,14 @@
             .getObserver()
             .on(function(chunk) {
               s.push({
+                data: chunk.data,
                 parent: chunk,
                 meta: {
                   name: 'merged-' + streamName + '-chunk'
                 }
               });
             })
-            .onError(s.triggerError.bind(s))
+            .onError(s.triggerError.call(s))
             .done(function() {
               openStreams--;
               if (openStreams === 0) {
@@ -293,6 +296,7 @@
 
       this.getObserver().on(function(chunk) {
         var data = {
+          data: chunk.data,
           parent: chunk,
           meta: {
             name: 'partitioned-chunk'
@@ -310,20 +314,21 @@
         a.triggerEnd();
         b.triggerEnd();
       });
+
+      return [a, b];
     },
 
     filter: function(fn) {
       var s = new Stream();
-      this.pipe(s, function(resolve, data) {
-        if (fn(data)) {
-          resolve(data);
+      this.pipe(s, function(resolve, chunk) {
+        if (fn(chunk)) {
+          resolve(chunk.data);
         }
       });
       return s;
     },
 
-    map: function(otherStream) {
-      // TODO
+    map: function(fn) {
       var s = new Stream();
       this.pipe(s, function(resolve, data) {
         resolve(fn(data));
@@ -335,10 +340,10 @@
       var s = new Stream(),
           last;
 
-      this.pipe(s, function(resolve, data) {
+      this.pipe(s, function(resolve, chunk) {
         var now = +(new Date());
         if (!last || now - last > ms) {
-          resolve(data);
+          resolve(chunk.data);
           last = now;
         }
       });
@@ -349,9 +354,9 @@
       var s = new Stream(),
           count = 0;
 
-      this.pipe(s, function(resolve, data) {
+      this.pipe(s, function(resolve, chunk) {
         if (count % times === 0) {
-          resolve(data);
+          resolve(chunk.data);
         }
         count++;
       });

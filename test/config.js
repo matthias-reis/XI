@@ -6,3 +6,11 @@ x1.paths({
   node31: ['/base/test/fixtures/node31.js'],
   node32: ['/base/test/fixtures/node32.js']
 });
+
+// For old Phantom 1.9.8
+Function.prototype.bind = Function.prototype.bind || function(thisp) {
+  var fn = this;
+  return function() {
+    return fn.apply(thisp, arguments);
+  };
+};
