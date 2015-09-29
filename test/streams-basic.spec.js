@@ -121,5 +121,49 @@ describe('Streams Basic Generation', function() {
       }
     })
   });
+  it('lets the stream return previous events', function() {
+    x1(['x1.streams'], {
+      ready: function(streams) {
+        var stream = new streams.Stream();
+        stream.push({data: 'data'});
+        stream.push({data: 'data'});
+        stream.push({data: 'data'});
+        stream.push({data: 'data'});
+        expect(stream.toArray()).have.length.of(4);
+      }
+    })
+  });
+  it('can make the stream stop recording events', function() {
+    x1(['x1.streams'], {
+      ready: function(streams) {
+        var stream = new streams.Stream();
+        stream.push({data: 'data'});
+        stream.push({data: 'data'});
+        stream.transient();
+        stream.push({data: 'data'});
+        stream.push({data: 'data'});
+        expect(stream.toArray()).have.length.of(0);
+      }
+    })
+  });
+  it('can return all previous events as a newstream', function(done) {
+    x1(['x1.streams'], {
+      ready: function(streams) {
+        var stream = new streams.Stream();
+        stream.push({val: 1});
+        stream.push({val: 2});
+        stream.push({val: 3});
+        var stream2 = stream.getAll();
+        var observer = stream2.getObserver();
+        var counter = 0;
+        observer.on(function(chunk) {
+          counter += chunk.data.val;
+        }).finally(function() {
+          expect(counter).to.equal(6);
+          done();
+        });
+      }
+    })
+  });
 
 });
