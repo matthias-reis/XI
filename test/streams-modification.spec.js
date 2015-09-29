@@ -1,6 +1,6 @@
-describe('Stream Modification', function() {
+describe('XI Stream Modification', function() {
   it('can append a promise to a stream', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
 
         var stream = streams.fromArray([2, 20, 10]);
@@ -31,7 +31,7 @@ describe('Stream Modification', function() {
   });
 
   it('can append a stream to a stream', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var s = streams.fromRange(1, 3);
         var s2 = s.append(function(chunk) {
@@ -51,13 +51,13 @@ describe('Stream Modification', function() {
   });
 
   it('can merge two streams into one', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var s1 = streams.fromSchedule(20, 3, function(i) {
-          return '5x' + i;
+          return '5@' + i;
         });
         var s2 = streams.fromSchedule(12, 4, function(i) {
-          return '3x' + i;
+          return '3@' + i;
         });
 
         var s = s1.merge(s2);
@@ -67,7 +67,7 @@ describe('Stream Modification', function() {
             var chunks = s.toArray().map(function(chunk) {
               return chunk.data
             });
-            expect(chunks).to.deep.equal(['5x0', '3x0', '3x1', '5x1', '3x2', '3x3', '5x2']);
+            expect(chunks).to.deep.equal(['5@0', '3@0', '3@1', '5@1', '3@2', '3@3', '5@2']);
             done();
           }, 0);
         });
@@ -76,7 +76,7 @@ describe('Stream Modification', function() {
   });
 
   it('split a stream into two', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var s = streams.fromRange(1, 10);
         var partitionedStreams = s.partition(function(chunk) {
@@ -97,7 +97,7 @@ describe('Stream Modification', function() {
   });
 
   it('can filter a stream', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var s = streams.fromRange(1, 10);
         var f = s.filter(function(chunk) {
@@ -118,7 +118,7 @@ describe('Stream Modification', function() {
   });
 
   it('can map a function to a stream', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var s = streams.fromRange(1, 5);
         var s2 = s.map(function(chunk) {
@@ -136,7 +136,7 @@ describe('Stream Modification', function() {
   });
 
   it('can throttle a stream', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var s = streams.fromSchedule(5, 10);
         var s2 = s.throttle(25);
@@ -151,24 +151,9 @@ describe('Stream Modification', function() {
     });
   });
 
-  it('can throttle a stream', function(done) {
-    x1(['x1.streams'], {
-      ready: function(streams) {
-        var s = streams.fromSchedule(5, 10);
-        var s2 = s.throttle(25);
-
-        s.getObserver().done(function() {
-          expect(s2.toArray().map(function(chunk) {
-            return chunk.data
-          })).to.deep.equal([0, 3, 6, 9]);
-          done();
-        });
-      }
-    });
-  });
 
   it('can skip events of a stream', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var s = streams.fromRange(1, 10);
         var s2 = s.skip(3);

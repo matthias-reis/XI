@@ -1,6 +1,6 @@
-describe('Stream Generators', function() {
+describe('XI Stream Generators', function() {
   it('creates a stream from a time interval schedule', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = streams.fromSchedule(10, 3); // 3 x every 10ms
         var counter = 0;
@@ -17,7 +17,7 @@ describe('Stream Generators', function() {
   });
 
   it('can manipulate the time schedule data', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = streams.fromSchedule(10, 3, function(i){
           return i + 1;
@@ -36,7 +36,7 @@ describe('Stream Generators', function() {
   });
 
   it('creates a stream from an array', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = streams.fromArray([10, 20, 30]);
         var sum = 0;
@@ -51,7 +51,7 @@ describe('Stream Generators', function() {
   });
 
   it('creates a stream out of a sequenced range', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = streams.fromRange(10, 14);
         var sum = 0;
@@ -66,7 +66,7 @@ describe('Stream Generators', function() {
   });
 
   it('creates a stream out of a sequenced range including step length', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = streams.fromRange(10, 30, 5);
         var sum = 0;
@@ -81,7 +81,7 @@ describe('Stream Generators', function() {
   });
 
   it('creates a stream from a promise', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = streams.fromPromise(new Promise(function (ok, fail) {
           window.setTimeout(ok, 10);
@@ -99,7 +99,7 @@ describe('Stream Generators', function() {
   });
 
   it('handles errors on promise based streams', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = streams.fromPromise(new Promise(function(ok, fail) {
           window.setTimeout(fail, 10);

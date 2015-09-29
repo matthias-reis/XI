@@ -6,8 +6,8 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai'],
     files: [
-      'client/js/x1/x1.bootstrap.js',
-      {pattern: 'client/js/x1/x1.*.js', watched: true, included: false, served: true},
+      'src/XI.js',
+      {pattern: 'src/*.XI.js', watched: true, included: false, served: true},
       {pattern: 'test/fixtures/*.js', watched: true, included: false, served: true},
       'test/config.js',
       'test/basics.spec.js',
@@ -17,11 +17,6 @@ module.exports = function(config) {
       'test/streams-generators.spec.js',
       'test/streams-modification.spec.js'
     ],
-    exclude: [],
-    preprocessors: {},
-    // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['progress'],
     port: 9876,
     colors: true,

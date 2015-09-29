@@ -107,7 +107,7 @@
     }
   }
 
-  global.x1 = function(name, dependencies, tasks) {
+  var XI = global.XI = global.Ξ = function(name, dependencies, tasks) {
     var node = {
       _version: version,
       _id: currentId++,
@@ -171,7 +171,9 @@
     return node;
   };
 
-  x1.register = function(key, callback) {
+  XI._version = version;
+
+  XI.register = function(key, callback) {
     if (typeof callback == 'function') {
       handlers[key] = callback;
     } else {
@@ -179,15 +181,15 @@
     }
   };
 
-  x1.paths = function(paths) {
-    if(!paths.x1) {
-      throw Error('path to x1 folder not defined');
+  XI.paths = function(paths) {
+    if(!paths.XI) {
+      throw Error('path to XI folder not defined');
     }
     modulePaths = paths;
-    modulePaths['x1.streams'] = [paths.x1 + '/x1.streams.js'];
+    modulePaths['XI.streams'] = [paths.XI + '/streams.XI.js'];
 
     if (!global.Promise) {
-      load(modulePaths.x1 + '/x1.promise.js', false, function(result) {
+      load(modulePaths.XI + '/promise.XI.js', false, function(result) {
         if (result.success) {
           trigger('runnable');
         } else {
@@ -207,8 +209,7 @@
   });
 
   // BASIC REGISTERS
-
-  x1.register('run', function(cb) {
+  XI.register('run', function(cb) {
     var node = this;
     timeout(function () {
       try {
@@ -219,7 +220,7 @@
     });
   });
 
-  x1.register('ready', function(cb) {
+  XI.register('ready', function(cb) {
     var node = this, vals = [];
     node.on('ready', function() {
       try {
@@ -230,7 +231,6 @@
         }
         cb.apply(node, vals);
       } catch (err) {
-        console.log(err);
         node.trigger('error', err);
       }
     });

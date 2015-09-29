@@ -1,7 +1,7 @@
-describe('Streams Basic Generation', function() {
+describe('XI Streams basic creation', function() {
 
   it('loads streams', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         expect(streams.Stream).to.be.defined;
         done();
@@ -10,7 +10,7 @@ describe('Streams Basic Generation', function() {
   });
 
   it('creates a stream from scratch', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         expect(stream.push).to.be.defined;
@@ -20,7 +20,7 @@ describe('Streams Basic Generation', function() {
   });
 
   it('lets the stream cope with events', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         var observer = stream.getObserver();
@@ -35,7 +35,7 @@ describe('Streams Basic Generation', function() {
   });
 
   it('lets the stream have an end', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         var observer = stream.getObserver();
@@ -54,7 +54,7 @@ describe('Streams Basic Generation', function() {
   });
 
   it('lets the stream cope with single events', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         var observer = stream.getObserver();
@@ -84,7 +84,7 @@ describe('Streams Basic Generation', function() {
   });
 
   it('lets the stream publish errors', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         var observer = stream.getObserver();
@@ -101,7 +101,7 @@ describe('Streams Basic Generation', function() {
   });
 
   it('lets the stream have more than one observer', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         var observer1 = stream.getObserver();
@@ -122,7 +122,7 @@ describe('Streams Basic Generation', function() {
     })
   });
   it('lets the stream return previous events', function() {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         stream.push({data: 'data'});
@@ -134,7 +134,7 @@ describe('Streams Basic Generation', function() {
     })
   });
   it('can make the stream stop recording events', function() {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         stream.push({data: 'data'});
@@ -147,7 +147,7 @@ describe('Streams Basic Generation', function() {
     })
   });
   it('can return all previous events as a newstream', function(done) {
-    x1(['x1.streams'], {
+    XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();
         stream.push({val: 1});

@@ -364,7 +364,7 @@
     }
   };
 
-  x1('x1.streams', {
+  XI('XI.streams', {
     Observer: Observer,
     Stream: Stream,
 

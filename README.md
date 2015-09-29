@@ -1,4 +1,4 @@
-X1 Application
+XI JS Framework
 ==============
 
 ## step 1 :: loader
