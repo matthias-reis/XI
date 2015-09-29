@@ -1,6 +1,6 @@
 (function(global) {
   "use strict";
-  var version = '0.0.1',
+  var version = '0.1.0',
       handlers = {},
       currentId = 0,
       nodes = {},
@@ -200,7 +200,6 @@
       trigger('runnable');
     }
   };
-
 
   global.addEventListener("load", function() {
     timeout(function() {
