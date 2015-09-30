@@ -143,6 +143,7 @@
       var counter = dependencies.length;
       if (dependencies.length) {
         dependencies.forEach(function(dependency) {
+          node._dependencies[dependency] = {};
           loadNode(dependency).then(function(otherNode) {
             node._dependencies[dependency] = otherNode;
             counter--;
