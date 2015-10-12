@@ -1,7 +1,7 @@
 (function(global) {
   "use strict";
-  var version = '0.1.1',
-      handlers = {},
+  var version = '0.1.2',
+      interceptors = {},
       currentId = 0,
       nodes = {},
       loadingNodes = {},
@@ -41,7 +41,8 @@
             counter--;
             if (!counter) {
               if (!nodes[nodeName]) {
-                reject(new Error('node not defined [' + nodeName + ']'));
+                nodes[nodeName] = true;
+                resolve();
               } else {
                 nodes[nodeName].on('ready', function() {
                   resolve(nodes[nodeName]);
@@ -109,11 +110,12 @@
 
   var XI = global.XI = global.Ξ = function(name, dependencies, tasks) {
     var node = {
-      _version: version,
-      _id: currentId++,
-      _messages: [],
-      _dependencies: {}
-    };
+          _version: version,
+          _id: currentId++,
+          _messages: [],
+          _dependencies: {}
+        },
+        appliedInterceptors = [];
 
     if (!is('String', name)) {
       node.name = 'anonymous' + node._id;
@@ -145,7 +147,11 @@
         dependencies.forEach(function(dependency) {
           node._dependencies[dependency] = {};
           loadNode(dependency).then(function(otherNode) {
-            node._dependencies[dependency] = otherNode;
+            if(otherNode || otherNode !== true) {
+              node._dependencies[dependency] = otherNode;
+            } else {
+              node._messages.push('dependencies: no node found in package [' + dependency + ']')
+            }
             counter--;
             if (!counter) {
               node.trigger('ready');
@@ -162,8 +168,9 @@
 
     for (var key in tasks) {
       if (tasks.hasOwnProperty(key)) {
-        if (handlers[key]) {
-          handlers[key].call(node, tasks[key]);
+        if (interceptors[key]) {
+          interceptors[key].call(node, tasks[key]);
+          appliedInterceptors.push(key);
         }
         node[key] = tasks[key];
       }
@@ -176,7 +183,7 @@
 
   XI.register = function(key, callback) {
     if (typeof callback == 'function') {
-      handlers[key] = callback;
+      interceptors[key] = callback;
     } else {
       this.node._messages.push('handler: registered without callback function [' + key + ']');
     }

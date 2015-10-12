@@ -15,7 +15,8 @@ module.exports = function(config) {
       'test/require.spec.js',
       'test/streams-basic.spec.js',
       'test/streams-generators.spec.js',
-      'test/streams-modification.spec.js'
+      'test/streams-modification.spec.js',
+      'test/css.spec.js'
     ],
     reporters: ['progress'],
     port: 9876,

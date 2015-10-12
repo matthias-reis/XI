@@ -1,0 +1,1 @@
+window.fortytwo = 42;

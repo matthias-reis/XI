@@ -4,7 +4,8 @@ XI.paths({
   node21: ['/base/test/fixtures/node21.js'],
   node22: ['/base/test/fixtures/node22.js'],
   node31: ['/base/test/fixtures/node31.js'],
-  node32: ['/base/test/fixtures/node32.js']
+  node32: ['/base/test/fixtures/node32.js'],
+  noNode: ['/base/test/fixtures/noNode.js']
 });
 
 // For old Phantom 1.9.8 --> no supported browser needs that!

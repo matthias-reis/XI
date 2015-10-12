@@ -48,4 +48,13 @@ describe('XI dependency management', function() {
       }
     });
   });
+
+  it('loads js files that are no XI nodes', function(done) {
+    XI(['noNode'], {
+      ready: function() {
+        expect(window.fortytwo).to.equal(42);
+        done();
+      }
+    });
+  });
 });
