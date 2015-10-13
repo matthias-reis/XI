@@ -43,7 +43,7 @@ describe('XI dependency management', function() {
     XI(['node31'], {
       ready: function(node31) {
         expect(node31.name).to.equal('node31');
-        expect(node31._dependencies.node32.name).to.equal('node32');
+        expect(node31.nodes.node32.name).to.equal('node32');
         done();
       }
     });
@@ -53,6 +53,18 @@ describe('XI dependency management', function() {
     XI(['noNode'], {
       ready: function() {
         expect(window.fortytwo).to.equal(42);
+        done();
+      }
+    });
+  });
+  it('can add a dependency dynamically', function(done) {
+    XI({
+      run: function () {
+        this.addDependency('node31');
+      },
+      ready: function(node31) {
+        expect(node31).to.be.defined;
+        expect(this.nodes.node31).to.be.defined;
         done();
       }
     });

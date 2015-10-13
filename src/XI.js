@@ -8,7 +8,12 @@
       modulePaths = {},
       events = {},
       document = global.document,
-      timeout = global.setTimeout;
+      timeout = global.setTimeout,
+      state = {
+        INITIAL: 0,
+        RUNNABLE: 1,
+        READY: 2
+      };
 
   function is(type, item) {
     return toString.call(item).indexOf('[object ' + type) === 0;
@@ -113,7 +118,8 @@
           _version: version,
           _id: currentId++,
           _messages: [],
-          _dependencies: {}
+          _state: state.INITIAL,
+          nodes: {}
         },
         appliedInterceptors = [];
 
@@ -141,30 +147,13 @@
       return node;
     };
 
-    on('document-runnable', function() {
-      var counter = dependencies.length;
-      if (dependencies.length) {
-        dependencies.forEach(function(dependency) {
-          node._dependencies[dependency] = {};
-          loadNode(dependency).then(function(otherNode) {
-            if(otherNode || otherNode !== true) {
-              node._dependencies[dependency] = otherNode;
-            } else {
-              node._messages.push('dependencies: no node found in package [' + dependency + ']')
-            }
-            counter--;
-            if (!counter) {
-              node.trigger('ready');
-            }
-          }).catch(function(err) {
-            node._messages.push(err);
-            node.trigger('error', err);
-          });
-        });
+    node.addDependency = function(dependency) {
+      if(node._state === state.INITIAL) {
+        dependencies.push(dependency);
       } else {
-        node.trigger('ready');
+        node._messages.push('dependencies: could not add dynamic dependency [' + dependency + ']')
       }
-    });
+    };
 
     for (var key in tasks) {
       if (tasks.hasOwnProperty(key)) {
@@ -176,6 +165,34 @@
       }
     }
 
+    on('document-runnable', function() {
+      var counter = dependencies.length;
+      node.state = 'runnable';
+      if (counter) {
+        dependencies.forEach(function(dependency) {
+          node.nodes[dependency] = {};
+          loadNode(dependency).then(function(otherNode) {
+            if(otherNode || otherNode !== true) {
+              node.nodes[dependency] = otherNode;
+            } else {
+              node._messages.push('dependencies: no node found in package [' + dependency + ']')
+            }
+            counter--;
+            if (!counter) {
+              node.state = 'ready';
+              node.trigger('ready');
+            }
+          }).catch(function(err) {
+            node._messages.push(err);
+            node.trigger('error', err);
+          });
+        });
+      } else {
+        node.state = 'ready';
+        node.trigger('ready');
+      }
+    });
+
     return node;
   };
 
@@ -185,7 +202,7 @@
     if (typeof callback == 'function') {
       interceptors[key] = callback;
     } else {
-      this.node._messages.push('handler: registered without callback function [' + key + ']');
+      this._messages.push('handler: registered without callback function [' + key + ']');
     }
   };
 
@@ -231,9 +248,9 @@
     var node = this, vals = [];
     node.on('ready', function() {
       try {
-        for (var key in node._dependencies) {
-          if (node._dependencies.hasOwnProperty(key)) {
-            vals.push(node._dependencies[key]);
+        for (var key in node.nodes) {
+          if (node.nodes.hasOwnProperty(key)) {
+            vals.push(node.nodes[key]);
           }
         }
         cb.apply(node, vals);
