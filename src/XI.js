@@ -1,6 +1,6 @@
 (function(global) {
   "use strict";
-  var version = '0.1.2',
+  var version = '0.2.0',
       interceptors = {},
       currentId = 0,
       nodes = {},
