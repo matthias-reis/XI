@@ -24,8 +24,8 @@ describe('XI Streams basic creation', function() {
       ready: function(streams) {
         var stream = new streams.Stream();
         var observer = stream.getObserver();
-        observer.on(function(data) {
-          expect(data.value).to.equal(42);
+        observer.on(function(chunk) {
+          expect(chunk.value).to.equal(42);
           done();
         });
 
@@ -146,7 +146,7 @@ describe('XI Streams basic creation', function() {
       }
     })
   });
-  it('can return all previous events as a newstream', function(done) {
+  it('can return all previous events as a new stream', function(done) {
     XI(['XI.streams'], {
       ready: function(streams) {
         var stream = new streams.Stream();

@@ -8,21 +8,21 @@ describe('XI Stream Modification', function() {
         var newStream = stream.appendPromise(function(chunk) {
           return new Promise(function(ok) {
             window.setTimeout(function() {
-              ok(chunk.data * 3);
-            }, chunk.data);
+              ok(chunk * 3);
+            }, chunk);
           });
         });
 
         newStream.getObserver().on(function(newChunk) {
           counter++;
           if (counter === 1) {
-            expect(newChunk.data).to.equal(6);
+            expect(newChunk).to.equal(6);
           }
           if (counter === 2) {
-            expect(newChunk.data).to.equal(30);
+            expect(newChunk).to.equal(30);
           }
           if (counter === 3) {
-            expect(newChunk.data).to.equal(60);
+            expect(newChunk).to.equal(60);
             done();
           }
         })
@@ -35,12 +35,12 @@ describe('XI Stream Modification', function() {
       ready: function(streams) {
         var s = streams.fromRange(1, 3);
         var s2 = s.append(function(chunk) {
-          return streams.fromArray([chunk.data * 10, chunk.data * 100]);
+          return streams.fromArray([chunk * 10, chunk * 100]);
         });
         s.getObserver().done(function() {
           window.setTimeout(function() {
             var chunks = s2.toArray().map(function(chunk) {
-              return chunk.data
+              return chunk.data;
             });
             expect(chunks).to.deep.equal([10, 100, 20, 200, 30, 300]);
             done();
@@ -80,15 +80,15 @@ describe('XI Stream Modification', function() {
       ready: function(streams) {
         var s = streams.fromRange(1, 10);
         var partitionedStreams = s.partition(function(chunk) {
-          return chunk.data % 2 === 0;
+          return chunk % 2 === 0;
         });
 
         s.getObserver().done(function() {
           expect(partitionedStreams[0].toArray().map(function(chunk) {
-            return chunk.data
+            return chunk.data;
           })).to.deep.equal([2, 4, 6, 8, 10]);
           expect(partitionedStreams[1].toArray().map(function(chunk) {
-            return chunk.data
+            return chunk.data;
           })).to.deep.equal([1, 3, 5, 7, 9]);
           done();
         });
@@ -101,15 +101,15 @@ describe('XI Stream Modification', function() {
       ready: function(streams) {
         var s = streams.fromRange(1, 10);
         var f = s.filter(function(chunk) {
-          return chunk.data % 2 === 0;
+          return chunk % 2 === 0;
         });
 
         s.getObserver().done(function() {
           expect(s.toArray().map(function(chunk) {
-            return chunk.data
+            return chunk.data;
           })).to.deep.equal([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
           expect(f.toArray().map(function(chunk) {
-            return chunk.data
+            return chunk.data;
           })).to.deep.equal([2, 4, 6, 8, 10]);
           done();
         });
@@ -122,12 +122,12 @@ describe('XI Stream Modification', function() {
       ready: function(streams) {
         var s = streams.fromRange(1, 5);
         var s2 = s.map(function(chunk) {
-          return chunk.data * 10;
+          return chunk * 10;
         });
 
         s.getObserver().done(function() {
           expect(s2.toArray().map(function(chunk) {
-            return chunk.data
+            return chunk.data;
           })).to.deep.equal([10, 20, 30, 40, 50]);
           done();
         });
@@ -143,7 +143,7 @@ describe('XI Stream Modification', function() {
 
         s.getObserver().done(function() {
           expect(s2.toArray().map(function(chunk) {
-            return chunk.data
+            return chunk.data;
           })).to.deep.equal([0, 3, 6, 9]);
           done();
         });
@@ -160,7 +160,7 @@ describe('XI Stream Modification', function() {
 
         s.getObserver().done(function() {
           expect(s2.toArray().map(function(chunk) {
-            return chunk.data
+            return chunk.data;
           })).to.deep.equal([1, 4, 7, 10]);
           done();
         });

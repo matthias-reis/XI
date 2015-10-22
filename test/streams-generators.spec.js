@@ -6,7 +6,7 @@ describe('XI Stream Generators', function() {
         var counter = 0;
 
         stream.getObserver().on(function (res) {
-          expect(res.data).to.equal(counter);
+          expect(res).to.equal(counter);
           counter++;
         }).finally(function () {
           expect(counter).to.equal(3);
@@ -26,7 +26,7 @@ describe('XI Stream Generators', function() {
 
         stream.getObserver().on(function(res) {
           counter++;
-          expect(res.data).to.equal(counter);
+          expect(res).to.equal(counter);
         }).finally(function() {
           expect(counter).to.equal(3);
           done();
@@ -41,7 +41,7 @@ describe('XI Stream Generators', function() {
         var stream = streams.fromArray([10, 20, 30]);
         var sum = 0;
         stream.getObserver().on(function(res) {
-          sum += res.data;
+          sum += res;
         }).finally(function() {
           expect(sum).to.equal(60);
           done();
@@ -56,7 +56,7 @@ describe('XI Stream Generators', function() {
         var stream = streams.fromRange(10, 14);
         var sum = 0;
         stream.getObserver().on(function(res) {
-          sum += res.data;
+          sum += res;
         }).finally(function() {
           expect(sum).to.equal(10 + 11 + 12 + 13 + 14);
           done();
@@ -71,7 +71,7 @@ describe('XI Stream Generators', function() {
         var stream = streams.fromRange(10, 30, 5);
         var sum = 0;
         stream.getObserver().on(function(res) {
-          sum += res.data;
+          sum += res;
         }).finally(function() {
           expect(sum).to.equal(10 + 15 + 20 + 25 + 30);
           done();
@@ -87,9 +87,9 @@ describe('XI Stream Generators', function() {
           window.setTimeout(ok, 10);
         }));
         var called = false;
-        stream.getObserver().on(function(res) {
+        stream.getObserver().on(function(res, meta) {
           called = true;
-          expect(res.meta.name).to.equal('single-promise-chunk');
+          expect(meta.name).to.equal('single-promise-chunk');
         }).finally(function() {
           expect(called).to.be.true;
           done();

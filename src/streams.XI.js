@@ -8,16 +8,12 @@
     var s = new Stream(),
         i = 0,
         fn = function() {
-          var data = {
-            data: generator(i),
-            meta: {
-              name: 'scheduled-chunk',
-              time: time,
-              iteration: i,
-              maxIterations: iterations
-            }
-          };
-          s.push(data);
+          s.push(generator(i), {
+            name: 'scheduled-chunk',
+            time: time,
+            iteration: i,
+            maxIterations: iterations
+          });
           if (!iterations || i < iterations - 1) {
             i++;
             window.setTimeout(fn, time);
@@ -34,13 +30,9 @@
     var s = new Stream();
     window.setTimeout(function() {
       arr.forEach(function(item) {
-        var data = {
-          data: item,
-          meta: {
-            name: 'array-chunk'
-          }
-        };
-        s.push(data);
+        s.push(item, {
+          name: 'array-chunk'
+        });
       });
       s.triggerEnd();
     }, 0);
@@ -53,16 +45,12 @@
     var s = new Stream();
     window.setTimeout(function() {
       for (var i = start; i <= end; i += stepSize) {
-        var data = {
-          data: i,
-          meta: {
-            name: 'range-chunk',
-            start: start,
-            end: end,
-            stepSize: stepSize
-          }
-        };
-        s.push(data);
+        s.push(i, {
+          name: 'range-chunk',
+          start: start,
+          end: end,
+          stepSize: stepSize
+        });
       }
       s.triggerEnd();
     }, 0);
@@ -73,15 +61,11 @@
   function fromPromise(promise) {
     var s = new Stream();
     promise.then(function(data) {
-      data = {
-        data: data,
-        meta: {
-          name: 'single-promise-chunk'
-        }
-      };
-      s.push(data);
+      s.push(data, {
+        name: 'single-promise-chunk'
+      });
       s.triggerEnd();
-    }, function (err) {
+    }, function(err) {
       s.triggerError(err);
     });
 
@@ -121,13 +105,13 @@
         cb();
       });
     },
-    trigger: function(data) {
+    trigger: function(data, meta) {
       var p;
       while (one = this._one.shift()) {// jshint ignore:line
-        one.ok(data);
+        one.ok(data, meta);
       }
       this._ev.forEach(function(cb) {
-        cb(data);
+        cb(data, meta);
       });
     },
     finally: function(cb) {
@@ -179,12 +163,15 @@
         obs.triggerEnd();
       });
     },
-    push: function(item) {
+    push: function(item, meta) {
       if (this._isStoring) {
-        this._s.push(item);
+        this._s.push({
+          data: item,
+          meta: meta
+        });
       }
       this._o.forEach(function(obs) {
-        obs.trigger(item);
+        obs.trigger(item, meta);
       });
     },
     transient: function() {
@@ -201,17 +188,14 @@
     pipe: function(other, fn) {
       var observer = this.getObserver();
 
-      observer.on(function(data) {
+      observer.on(function(data, meta) {
         fn(function(resultingData) {
-          var chunk = {
-            data: resultingData,
+          other.push(resultingData, {
             parent: data,
-            meta: {
-              name: 'piped-chunk'
-            }
-          };
-          other.push(chunk);
-        }, data);
+            parentMeta: meta,
+            name: 'piped-chunk'
+          });
+        }, data, meta);
       }).onError(other.triggerError.bind(other)).done(other.triggerEnd.bind(other));
     },
 
@@ -219,19 +203,17 @@
     /*** STREAM MANIPULATORS ***/
     appendPromise: function(fn) {
       var s = new Stream();
-      this.getObserver().on(function(data) {
+      this.getObserver().on(function(data, meta) {
         var promise = fn(data);
         if (!promise || !promise.then) {
           s.triggerError(new Error('appendPromise: the callback function must return a promise'));
           return;
         }
         promise.then(function(resultingData) {
-          s.push({
-            data: resultingData,
+          s.push(resultingData, {
             parent: data,
-            meta: {
-              name: 'appended-promise-chunk'
-            }
+            parentMeta: meta,
+            name: 'appended-promise-chunk'
           });
         });
       });
@@ -241,21 +223,20 @@
     append: function(fn) {
       var s = new Stream();
       var onError =
-      this.getObserver()
-          .on(function(data) {
-            fn(data).getObserver()
-                .on(function(childData) {
-                  s.push({
-                    data: childData.data,
-                    parent: data,
-                    meta: {
-                      name: 'appended-stream-chunk'
-                    }
-                  });
-                })
-                .onError(s.triggerError.bind(s));
-          })
-          .onError(s.triggerError.bind(s));
+          this.getObserver()
+              .on(function(data, meta) {
+                fn(data, meta).getObserver()
+                    .on(function(childData, childMeta) {
+                      s.push(childData, {
+                        parent: data,
+                        parentMeta: meta,
+                        childMeta: childMeta,
+                        name: 'appended-stream-chunk'
+                      });
+                    })
+                    .onError(s.triggerError.bind(s));
+              })
+              .onError(s.triggerError.bind(s));
       return s;
     },
 
@@ -266,13 +247,10 @@
       var connect = function(stream, streamName) {
         stream
             .getObserver()
-            .on(function(chunk) {
-              s.push({
-                data: chunk.data,
-                parent: chunk,
-                meta: {
-                  name: 'merged-' + streamName + '-chunk'
-                }
+            .on(function(chunk, meta) {
+              s.push(chunk, {
+                parentMeta: meta,
+                name: 'merged-' + streamName + '-chunk'
               });
             })
             .onError(s.triggerError.call(s))
@@ -294,18 +272,15 @@
       var a = new Stream();
       var b = new Stream();
 
-      this.getObserver().on(function(chunk) {
-        var data = {
-          data: chunk.data,
-          parent: chunk,
-          meta: {
-            name: 'partitioned-chunk'
-          }
+      this.getObserver().on(function(chunk, meta) {
+        var childMeta = {
+          parentMeta: meta,
+          name: 'partitioned-chunk'
         };
         if (fn(chunk)) {
-          a.push(data);
+          a.push(chunk, childMeta);
         } else {
-          b.push(data);
+          b.push(chunk, childMeta);
         }
       }).onError(function(err) {
         a.triggerError(err);
@@ -320,9 +295,9 @@
 
     filter: function(fn) {
       var s = new Stream();
-      this.pipe(s, function(resolve, chunk) {
-        if (fn(chunk)) {
-          resolve(chunk.data);
+      this.pipe(s, function(resolve, chunk, meta) {
+        if (fn(chunk, meta)) {
+          resolve(chunk);
         }
       });
       return s;
@@ -330,8 +305,8 @@
 
     map: function(fn) {
       var s = new Stream();
-      this.pipe(s, function(resolve, data) {
-        resolve(fn(data));
+      this.pipe(s, function(resolve, chunk, meta) {
+        resolve(fn(chunk, meta));
       });
       return s;
     },
@@ -343,7 +318,7 @@
       this.pipe(s, function(resolve, chunk) {
         var now = +(new Date());
         if (!last || now - last > ms) {
-          resolve(chunk.data);
+          resolve(chunk);
           last = now;
         }
       });
@@ -356,7 +331,7 @@
 
       this.pipe(s, function(resolve, chunk) {
         if (count % times === 0) {
-          resolve(chunk.data);
+          resolve(chunk);
         }
         count++;
       });
